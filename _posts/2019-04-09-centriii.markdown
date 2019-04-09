@@ -1,10 +1,12 @@
----
+﻿---
 layout: post
 title:  "launchCentriii"
-date:   2019-04-09 18:38:22 +0800
+date:   2019-04-09 20:38:22 +0800
 categories: Routine
 ---
 passed
 passedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassed
 passedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassed
+
+是这样的。。我的想法， 我东西不都是传到github上面去的么
 
