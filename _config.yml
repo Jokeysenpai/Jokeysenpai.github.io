@@ -53,7 +53,7 @@ description: >-
   Google search results) and in your feed.xml site description.
 baseurl: ""
  # the subpath of your site, e.g. /blog
-url: "https://jokeysenpai.github.io"
+url: ""
  # the base hostname & protocol for your site, e.g. https://jokeysenpai.github.io/
 >>>>>>> parent of b049eb5... Update _config.yml
 twitter_username: Unknown
