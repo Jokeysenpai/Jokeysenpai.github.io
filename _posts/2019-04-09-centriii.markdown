@@ -1,12 +1,13 @@
 ﻿---
 layout: post
-title:  "launchCentriii"
+title:  "LaunchCentriii"
 date:   2019-04-09 20:38:22 +0800
 categories: Routine
 ---
-passed
-passedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassed
-passedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassedpassed
+可能过了很多年吧，以前也有过写博客的想法。
+今天看着FPGA的DDS生成器回想32的寄存器操作什么都想不起来，又想要搞个有点逼格，舒服的博客用用。
+也看了很多云服务器的教育优惠，转念忽然想起来github不是个云盘来着么，然后一查发现还真能当作博客服务器用，于是忙活一天就把这个伪Centriii建起来了。
+虽然效率很低，没学什么东西，但是好歹也是半个码农，github也该好好用用。
 
-是这样的。。我的想法， 我东西不都是传到github上面去的么
-
+也为了致敬偶像Patina27，如今对嵌入式，对程序的兴趣也都算有他的影响。
+从前曾经那么接近自己喜欢的一切却又不知道珍惜，长大了一定要学会珍惜每一个细节。
