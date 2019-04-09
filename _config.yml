@@ -18,7 +18,7 @@ email: 380949381@qq.com
 description: >- # this means to ignore newlines until "baseurl:"
    A site used to record many on Embedded system. A tough protocol site built by a poor EE student.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://jokeysenpai.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: Unknown
 github_username:  Jokeysenpai
 
