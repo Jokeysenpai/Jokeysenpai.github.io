@@ -1,14 +1,12 @@
-    ---
+---
 layout: page
 title: About
 permalink: /about/
 ---
 
-This is a website built by Fengyan, and it's actually a successor of an old blog Centriii. Through years the dream of me has never changed. And Centriii also will go on.
+This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
 
-By a learning hardware engineer and hope you like it.
-
-Theme by Jekyll and You can find the source code for Minima at GitHub:
+You can find the source code for Minima at GitHub:
 [jekyll][jekyll-organization] /
 [minima](https://github.com/jekyll/minima)
 
