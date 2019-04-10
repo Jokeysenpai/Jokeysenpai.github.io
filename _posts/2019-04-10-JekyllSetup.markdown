@@ -42,7 +42,7 @@ categories: Routine
 
 注册一个GitHub账号并登陆，看右上角加号位置，点击创建新库
 
-![repo](https://github.com/Jokeysenpai/Jokeysenpai.github.io/blob/master/_img/image1.png)
+![repo](https://github.com/Jokeysenpai/Jokeysenpai.github.io/blob/master/_img/image1.jpg)
 
 然后记得输入库名的时候要和自己的username一致，虽然没弄清楚为什么，但是大概和框架建立时的连接有关系
 
