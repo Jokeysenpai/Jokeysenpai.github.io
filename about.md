@@ -4,7 +4,9 @@ title: About
 permalink: /about/
 ---
 
-Blog by Fengyan and it's a successor of Centriii.com.
+# GOD'S IN HIS HEAVEN ALL'S RIGHT WITHIN THIS WORLD.
+
+Blog by Fengyan and it's a successor of Centriii, former blog shipped with dreams.
 
 This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
 
