@@ -19,7 +19,7 @@ description: >- # this means to ignore newlines until "baseurl:"
   A site used to record many on Embedded system. A tough protocol site built by a poor EE student.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://jokeysenpai.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: Unknown
+twitter_username:  
 github_username:  Jokeysenpai
 
 # Build settings
