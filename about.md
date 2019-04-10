@@ -4,7 +4,9 @@ title: About
 permalink: /about/
 ---
 
-# GOD'S IN HIS HEAVEN ALL'S RIGHT WITHIN THIS WORLD.
+# God's in his heaven
+
+# All's right within this world.
 
 Blog by Fengyan and it's a successor of Centriii, former blog shipped with dreams.
 
