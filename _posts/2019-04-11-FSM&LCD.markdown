@@ -1,0 +1,279 @@
+﻿---
+layout: post
+title:  "FSM概念和FPGA中的简单LCD操作"
+date:   2019-04-11 08:58:23 +0800
+categories: Routine
+---
+# 有限状态机Finite state machine
+
+简单的逻辑概念，用图表方式表达。复杂的多模块电路设计可以非常方便地表示出来。
+
+分为Moore状态机和Mealy状态机。
+
+Moore状态机的输出由current state决定，而mealy状态机的输出由current state和input决定。
+
+```
+确定状态机内部没有缺少逻辑的方法：
+1. 不缺状态
+2. 不缺状态转换字（看输入脚是几位，就有2^n个转换箭头）
+3. 不缺输出
+```
+
+
+![](/img/image5.png)
+
+本文主要介绍在FPGA（verilog）中使用mealy状态机双模块交互并行操作1602LCD的方法
+
+并行针脚连接如下
+
+![](/img/image9.png)
+
+1602LCD显示的内容为 16×2，即可以显示两行，即可以显示两16个字符，目前市面 上字符液晶大多数是基于 HD44780和SPLC780D液晶芯片，控制原理是完全相同 的，因此基于 HD44780和SPLC780D写的控制程序可以很方便地应用于市面上大 写的控制程序可以很方便地应用于市面上大部分LCD屏幕。
+
+本文中显示字符操作通过从LCD控制模块的CGROM中读取出默认保存的字符，出厂时CGROM中默认保存了标准的ascii码，日文字符和希腊文字符。
+
+字符表如下：
+
+![word](/img/image10.png)
+
+1602LCD的控制器显存有80个byte，而1602LCD只有两行X16字符的显示区域，所以显存中有些地址是无法对应上LCD屏幕的，但是可以预先保存在显存中，通过
+移位操作进行显示，下图为显存地址对应图：
+
+![](/img/image11.png)
+
+要显示字符时要先输入首个字符的地址，然后由于置输入模式的设置，再次读取使能时会读取预设位置的字符。
+
+比如第二行第一个字符，我们需要写入地址等于C0H——尽管第二行第一个字符是40H的地址，但是由于读取CGROM时的状态字设定D7最高位恒为1，所以
+设定时将数据位设置为01000000B(40H）+10000000B(80H）=11000000B(C0H).
+
+也因此，每个字节位置的地址要加80H或者C0H（状态字设定）。
+
+
+给出1602控制字表:
+
+![](/img/image12.png)
+
+并行操作时序图如下：
+
+![](/img/img7.png)
+
+看上去很复杂，图中需要注意的地方有给电平的顺序，每个针脚电平变化的时间间隔（为了保证针脚电平稳定）。
+
+具体可以参考时序时间参数图
+
+![](/img/img8.png)
+
+RS针脚决定data位读取是数据还是状态字，R/W针脚决定是读取还是将LCD内信息写出给处理器，使能针脚的高电平是数据针脚稳定之后让模块使能并读取数据的命令——设置好输入顺序状态字之后，
+每次重新激活使能就会往下一个地址位写入数据（控制模块自带功能，都不用每次重新写数据位）
+
+
+
+简单总结LCD并行操作的关键顺序即：选RS，上数据（包含R/W文字），给使能。给数据和给使能步骤有严谨的先后顺序，
+在单片机C中，低端IC（如51）先后语句有可观的延时，所以顺序编写程序语句可以实现功能。
+
+在更加高端的使用高频时钟信号的FPGA中(或者高性能IC单片也需要注意），由于Verilog语句大多是并行执行，这里采用一个双模块状态机来确保数据读取的使能过程和全部的针脚设置过程分开。 
+
+![](/img/image6.png)
+
+
+实例：
+
+1. 使能控制端
+
+```
+module LCD_Controller (	iCLK,iRST_N,iStart,oDone,LCD_EN);
+parameter	CLK_Divide	=	16;
+
+
+input	 iStart;
+input	 iCLK,iRST_N;
+output oDone;
+output LCD_EN;
+reg oDone;
+reg LCD_EN;
+//	Internal Register
+reg		[4:0]	Cont;
+reg		[1:0]	ST;
+reg		preStart,mStart;
+
+
+
+always@(posedge iCLK or negedge iRST_N)
+begin
+	if(!iRST_N)
+	begin
+		oDone	<=	1'b0;
+		LCD_EN	<=	1'b0;
+		preStart<=	1'b0;
+		mStart	<=	1'b0;
+		Cont	<=	0;
+		ST		<=	0;
+	end
+	else
+	begin
+		//////	Input Start Detect ///////
+		preStart<=	iStart;
+		if({preStart,iStart}==2'b01)
+		begin
+			mStart	<=	1'b1;
+			oDone	<=	1'b0;
+		end
+		//////////////////////////////////
+		if(mStart)
+		begin
+			case(ST)
+			0:	ST	<=	1;	//	Wait Setup
+			1:	begin
+					LCD_EN	<=	1'b1;
+					ST		<=	2;
+				end
+			2:	begin					
+					if(Cont<CLK_Divide)
+					Cont	<=	Cont+1;
+					else
+					ST		<=	3;
+				end
+			3:	begin
+					LCD_EN	<=	1'b0;
+					mStart	<=	1'b0;
+					oDone	<=	1'b1;
+					Cont	<=	0;
+					ST		<=	0;
+				end
+			endcase
+		end
+	end
+end
+
+endmodule
+```
+
+2.数据端口
+
+```
+module	LCD_TEST (	//	Host Side
+					      iCLK,iRST_N,mLCD_Done,
+					     // LCD Side
+					      mLCD_DATA,mLCD_RS,mLCD_Start);
+//	Host Side
+input			iCLK,iRST_N,mLCD_Done;
+//	LCD Side
+output	[7:0]	mLCD_DATA;
+output			mLCD_RS,mLCD_Start;
+//	Internal Wires/Registers
+reg	[5:0]	LUT_INDEX;
+reg	[8:0]	LUT_DATA;
+reg	[5:0]	mLCD_ST;
+reg	[17:0]	mDLY;
+reg			mLCD_Start;
+reg	[7:0]	mLCD_DATA;
+reg			mLCD_RS;
+wire		mLCD_Done;
+
+parameter	LCD_INTIAL	=	0;
+parameter	LCD_LINE1	=	5;//初始化
+parameter	LCD_CH_LINE	=	LCD_LINE1+16;
+parameter	LCD_LINE2	=	LCD_LINE1+16+1;
+parameter	LUT_SIZE	=	LCD_LINE1+32+1;
+
+always@(posedge iCLK or negedge iRST_N)
+begin
+	if(!iRST_N)
+	begin
+		LUT_INDEX	<=	0;
+		mLCD_ST		<=	0;
+		mDLY		<=	0;
+		mLCD_Start	<=	0;
+		mLCD_DATA	<=	0;
+		mLCD_RS		<=	0;
+	end
+	else
+	begin
+		if(LUT_INDEX<LUT_SIZE)
+		begin
+			case(mLCD_ST)
+			0:	begin//确定当前八位data位读出是数据本身还是状态字，并读出八位数据位，给控制enable端送出开始指令，跳到case2
+					mLCD_D	ATA	<=	LUT_DATA[7:0];
+					mLCD_RS		<=	LUT_DATA[8];
+					mLCD_Start	<=	1;
+					mLCD_ST		<=	1;
+				end
+			1:	begin//接受控制enable端的结束指令，立刻停止输出开始信号防止控制端再读一次enable指令，跳到case3
+					if(mLCD_Done)
+					begin
+						mLCD_Start	<=	0;
+						mLCD_ST		<=	2;					
+					end
+				end
+			2:	begin//延迟保证阵针脚电平稳定，跳到case3
+					if(mDLY<18'h3FFFE)
+					mDLY	<=	mDLY+1;
+					else
+					begin
+						mDLY	<=	0;
+						mLCD_ST	<=	3;
+					end
+				end
+			3:	begin// 进行下一个字符位置的读取，跳到case0
+					LUT_INDEX	<=	LUT_INDEX+1;
+					mLCD_ST	<=	0;
+				end
+			endcase
+		end
+	end
+end
+
+always
+begin
+	case(LUT_INDEX)
+	//	Initial
+	LCD_INTIAL+0:	LUT_DATA	<=	9'h038;// 八总线，双行 5X7点阵字符
+	LCD_INTIAL+1:	LUT_DATA	<=	9'h00C;//打开显示屏，关闭光标和光标闪动功能
+	LCD_INTIAL+2:	LUT_DATA	<=	9'h001;//清空LCD显示器
+	LCD_INTIAL+3:	LUT_DATA	<=	9'h006;//字符输入向右，输入时文字本身不移动
+	LCD_INTIAL+4:	LUT_DATA	<=	9'h080;//读取初始字符位置 第一行
+	//	Line 1
+	LCD_LINE1+0:	LUT_DATA	<=	9'h120;	//	Welcome to the
+	LCD_LINE1+1:	LUT_DATA	<=	9'h157;
+	LCD_LINE1+2:	LUT_DATA	<=	9'h165;
+	LCD_LINE1+3:	LUT_DATA	<=	9'h16C;
+	LCD_LINE1+4:	LUT_DATA	<=	9'h163;
+	LCD_LINE1+5:	LUT_DATA	<=	9'h16F;
+	LCD_LINE1+6:	LUT_DATA	<=	9'h16D;
+	LCD_LINE1+7:	LUT_DATA	<=	9'h165;
+	LCD_LINE1+8:	LUT_DATA	<=	9'h120;
+	LCD_LINE1+9:	LUT_DATA	<=	9'h174;
+	LCD_LINE1+10:	LUT_DATA	<=	9'h16F;
+	LCD_LINE1+11:	LUT_DATA	<=	9'h120;
+	LCD_LINE1+12:	LUT_DATA	<=	9'h174;
+	LCD_LINE1+13:	LUT_DATA	<=	9'h168;
+	LCD_LINE1+14:	LUT_DATA	<=	9'h165;
+	LCD_LINE1+15:	LUT_DATA	<=	9'h120;
+	//	Change Line
+	LCD_CH_LINE:	LUT_DATA	<=	9'h0C0;//将初始字符位置放置到第二行
+	//	Line 2
+	LCD_LINE2+0:	LUT_DATA	<=	9'h145;	//	ETCEIS of UESTC
+	LCD_LINE2+1:	LUT_DATA	<=	9'h154;	
+	LCD_LINE2+2:	LUT_DATA	<=	9'h143;
+	LCD_LINE2+3:	LUT_DATA	<=	9'h145;
+	LCD_LINE2+4:	LUT_DATA	<=	9'h149;
+	LCD_LINE2+5:	LUT_DATA	<=	9'h153;
+	LCD_LINE2+6:	LUT_DATA	<=	9'h120;
+	LCD_LINE2+7:	LUT_DATA	<=	9'h16F;
+	LCD_LINE2+8:	LUT_DATA	<=	9'h166;
+	LCD_LINE2+9:	LUT_DATA	<=	9'h120;
+	LCD_LINE2+10:	LUT_DATA	<=	9'h155;
+	LCD_LINE2+11:	LUT_DATA	<=	9'h145;
+	LCD_LINE2+12:	LUT_DATA	<=	9'h153;
+	LCD_LINE2+13:	LUT_DATA	<=	9'h154;
+	LCD_LINE2+14:	LUT_DATA	<=	9'h143;
+	LCD_LINE2+15:	LUT_DATA	<=	9'h121;//Space
+	default:		LUT_DATA	<=	9'h120;
+	endcase
+end
+endmodule
+
+```
+
+以上。
+
