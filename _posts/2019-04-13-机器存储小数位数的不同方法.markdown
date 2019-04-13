@@ -1,0 +1,60 @@
+﻿---
+layout: post
+title:  "二补法存储&固定点法和浮点法存储小数位"
+date:   2019-04-13 21:17:23 +0800
+categories: Routine
+---
+本文介绍关于电脑建构中小数存储的方法。
+
+>"There are only 10 types of programmers: those who understand binary, and those who don't."
+
+当涉及计算机中符号数的存取时，数据一般分为原码，反码（1's complement code)和补码（2's complement code)。
+
+unsigned变量貌似没有这些说法，对于signed变量来说：
+
+原码以第一位作为符号位，0代表正数，1代表负数，后面位数以二进制正常表示数字。 
+
+
+反码仍然以第一位作为符号位，从十进制变为有符号二进制表达的角度来说：
+
+1.如果十进制数是个正数，除第一位0以外的二进制位内的数字即十进制转换来的二进制数（和原码一样）。
+
+2.如果十进制数是个负数，那么第一位是1，之后的数字是十进制转换来的二进制数取反。
+
+这么做的好处是不用设计负数的比较电路（可见-1>-2），但以上两种方法都有正0和负0的重复存储。
+
+
+补码，以第一位作为符号位，从十进制变为有符号二进制表达的角度来说：
+
+1.如果十进制数是个正数，除第一位0以外的二进制位内的数字即十进制转换来的二进制数（和原码一样）。
+
+2.如果十进制数是个负数，那么第一位是1，之后的数字是十进制转换来的二进制数取反之后+1。
+
+补码解决了重复0的问题并多存储了一位负数。
+
+![])(/img/image14.png)
+
+
+
+而小数存储一般分为fixed-point 和floating-point两种，
+
+fixed-point方法是机器内默认了小数点的位置之后，用对应位数存储所有的数字，在写出的时候会默认乘上一个指数来变成小数：
+
+Example: with m=-3 (resolution of 0.001 or milli) the value range is 0.000 to 65.535 (with 16-bit)
+What is π represented as in memory, when using Decimal Fixed-Point with m = -3?
+
+ π(3.14159…) = I*10^-3 
+
+=> I = Integral approximation of (3.14159…*10^3)
+
+ I = Integral approximation of (3141.59) 
+
+I = 3142
+
+二进制的fixed point就将指数幂的底数变成2，
+
+但至今没明白题目如果让我“用fixed-point的表示方法”写出来的时候我是写一个式子还是把他算成十进制的样子表示出来。
+
+浮点方法表示数字，小数点可以在内存位数中间移动，从而获得更大的小数分辨率或者整数范围——具体方法有些忘记了，之后有时间了再看了补上。
+
+
