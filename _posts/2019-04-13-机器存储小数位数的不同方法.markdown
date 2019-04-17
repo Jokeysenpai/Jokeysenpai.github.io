@@ -46,7 +46,7 @@ unsigned变量貌似没有这些说法，对于signed变量来说：
 
 经过查询发现有以下规则：
 
-!()[/img/image15.png]
+![](/img/image15.png)
 
 
 
