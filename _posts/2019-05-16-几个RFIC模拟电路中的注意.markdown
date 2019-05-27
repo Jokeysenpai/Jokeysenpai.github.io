@@ -1,0 +1,74 @@
+﻿---
+layout: post
+title:  "几个RFIC模拟电路中的注意"
+date:   2019-05-27 14:00:00 +0800
+categories: Routine
+---
+##反馈电路topology的判断
+
+>反馈放大器可以减小放大倍数，增大通过带宽，减小信号变化造成的失真。
+
+问题主要出现在Sandra Smith的Microelectronic Circuits中，对反馈结构的描述基于理解原理后建立的基础模型，在实际应用环境下很难判断放大器的基础结构。
+
+![](/img/image2.jpg)
+
+四种不同的基本拓扑结构如图，在Sandra Smith的MC中，介绍主要使用括号中写的名词进行描述（方法②），不方便理解，所以使用括号外的描述方法①并且介绍一种简单粗暴的观察方法。
+
+####首先是两种表述方法的转换方式
+
+我们之后会首先从电路中得出方法①的描述然后转换成方法②，所以先介绍如何从方法①转换成方法②。
+
+以经验结果论，我们有原则：sampling 方法voltage对应shunt， 方法current 对应series，替换后改变前后顺序即是方法二的结果。 
+
+以上图图一为例，输出量为电压，所以是voltage sampling，而反馈信号也是电压，连接回输入电路的方法是串联（反馈信号和连接方式有对应），所以是series mixing。
+
+voltage sampling 对应 shunt 前后替换后 voltage-series feedback就变成了 series-shunt feedback，对应Voltage Amp 适用的反馈拓扑结构。
+
+####例子
+
+![](/img/image3.jpg)
+
+图为未连接左下节点的一个反馈放大器。
+
+连接上断开 节点后，输出信号为电压（我们想要的），反馈信号是电压（有一端接地，只有电压信号），所以我们可以知道这是Voltage-sampling series-mixing Feedback。
+
+而转换成方法②中的表示方法即是 series-shunt feedback。[https://www.youtube.com/watch?v=GufufacT88o]
+
+Sandra Smith书中写的被认为是对的但是引起了很多误解【大概】
+
+
+
+
+##带源极电阻的共源极MOSFET输出电阻计算
+
+骚气邓老师的第五章ppt里面写 CSwith Rs的忽视r0输出电阻是 下拉电阻RD，但许多例题里面的输出电阻并没有那么简单，枯了。
+
+![](/img/image24.png)
+
+![](/img/image25.png)
+
+经过计算 正确式子是:
+
+`rout=RD||(ro*(1+gmRs)+Rs)`
+
+
+
+##工程相关计算的时候记得约等于
+
+```
+A=X+Y+Z;
+B=(1+MN);
+C=A+B
+```
+遇到这种情况的时候，观察XYZ，MN的值，有较大值（相加两项比较超过一百倍就忽略小的那项）。
+
+再带入数据计算结果，不然你就会变成卡兹sama。
+
+
+
+
+
+
+
+
+
